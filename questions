@@ -1,3 +1,6 @@
 1. What 5ppm means in by numbers.
 2. Should we use the intensity for the sake of the algorithm? If yes how should we do it?
 3. What is the new work added to out project?
+4. Does the number of different data units from a blood sample should be same?
+If not, how can I know if the components are the same?
+5. Should not be there another table that makes the connection between chemical name and its mass?
