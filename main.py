@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import re
-# import numpy as np
+import numpy as np
 
 MZ_NAME = "MZ"
 INTENSITY_NAME = "Intensity"
@@ -70,11 +70,10 @@ def getPanelContainingAllDataFrames():
 
 
 def main():
-    # all_data = getDataFrameWithAllDataFramesTogether()
+    all_data = getDataFrameWithAllDataFramesTogether()
     all_MZ_data = getDataFrameWithAllMZDataFramesTogether()
+
     print("done")
-
-
 
 if __name__ == '__main__':
     main()
