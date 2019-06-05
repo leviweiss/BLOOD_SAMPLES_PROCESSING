@@ -31,8 +31,7 @@ def getDataFrameWithAllDataFramesTogether():
         sample_file_name_without_suffix = (str)(sample_file_name.split(".")[0])
         first_col_name = sample_file_name_without_suffix + " " + MZ_NAME
         second_col_name = sample_file_name_without_suffix + " " + INTENSITY_NAME
-        list_of_data_frames.append(
-            pd.read_excel(sample_file_path, names=[first_col_name, second_col_name]))
+        list_of_data_frames.append(pd.read_excel(sample_file_path, names=[first_col_name, second_col_name]))
 
     return pd.concat(list_of_data_frames, axis=1)
 
