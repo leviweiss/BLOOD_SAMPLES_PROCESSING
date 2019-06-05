@@ -3,11 +3,15 @@ import glob
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import argrelextrema
-import sklearn
-
 import sys
+import sklearn
+import seaborn as sns
+import re
+
+from scipy.signal import argrelextrema
+
 sys.path.insert(0, os.path.dirname(__file__))
+
 
 MZ_NAME = "MZ"
 INTENSITY_NAME = "Intensity"
@@ -21,15 +25,21 @@ def get_data_frames():
 
 
 def getDataFrameWithAllDataFramesTogether():
-    # script_dir_path = os.path.dirname(__file__)
-    # data_dir_path = os.path.join(script_dir_path, "data")
-    data_dir_path = 'data'
+    script_dir_path = os.path.dirname(__file__)
+    data_dir_path = os.path.join(script_dir_path, "data")
 
-    data_frames = list(getDataFrames().values())
-    
+    list_of_data_frames = []
+    for sample_file_name in humanSort(os.listdir(data_dir_path)):
+        sample_file_path = os.path.join(data_dir_path, sample_file_name)
+        sample_file_name_without_suffix = (str)(sample_file_name.split(".")[0])
+        first_col_name = sample_file_name_without_suffix + " " + MZ_NAME
+        second_col_name = sample_file_name_without_suffix + " " + INTENSITY_NAME
+        list_of_data_frames.append(pd.read_excel(sample_file_path, names=[first_col_name, second_col_name]))
+        
     return pd.concat(list_of_data_frames, axis=1)
 
 
+// shai's code
 def show_plots(n=5):
     samples = get_data_frames()
     for i, (sample_name, df) in enumerate(list(samples.items())[:5]):
@@ -48,6 +58,11 @@ def show_plots(n=5):
 
 
 def main():
+
+    all_data = getDataFrameWithAllDataFramesTogether()
+    all_MZ_data = getDataFrameWithAllMZDataFramesTogether()
+    
+    // shai's code
     samples = get_data_frames()
     joined = pd.concat(df.MZ for df in samples.values())
     columns = ['MZ_{}'.format(os.path.basename(sample_name)) for sample_name in samples.keys()]
@@ -58,7 +73,8 @@ def main():
     table.save  
     return table
 
+    print("done")
 
 if __name__ == '__main__':
-    print(main())
-    # show_plots(int(sys.argv[1]))
+    main()
+    
