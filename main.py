@@ -7,6 +7,7 @@ import numpy as np
 
 MZ_NAME = "MZ"
 INTENSITY_NAME = "Intensity"
+PPM = 5
 
 
 def atoi(text):
@@ -68,9 +69,39 @@ def getPanelContainingAllDataFrames():
     return pd.Panel(dict_of_sample_name_and_data)
 
 
+def fillMatchedMZDataFrame(matchedMZDataFrame, row, column, curr_number):
+
+
+
+def getDataFrameFilledWithMatchedMZ(all_MZ_data):
+
+    # initialize the matchedMZDataFrame
+    shape = all_MZ_data.shape
+    number_of_rows = shape[0]
+    number_of_columns = shape[1]
+    matchedMZDataFrame = pd.DataFrame(index=range(number_of_rows), columns=range(number_of_columns))
+    matchedMZDataFrame[0] = np.arange(number_of_rows)
+
+    # initialize the number need for iterating
+    curr_number = number_of_columns
+
+    # iteration over the df
+    for column in matchedMZDataFrame:
+        currMatchedMZDataFrameColumn = matchedMZDataFrame[column]
+        for items in currMatchedMZDataFrameColumn.iteritems():
+            row = items[0]
+            value = items[1]
+            if(pd.isna(value)):
+                print("done")
+                fillMatchedMZDataFrame(matchedMZDataFrame, row, column, curr_number)
+
+
+    print("done")
+
 def main():
-    all_data = getDataFrameWithAllDataFramesTogether()
+    # all_data = getDataFrameWithAllDataFramesTogether()
     all_MZ_data = getDataFrameWithAllMZDataFramesTogether()
+    matched_mz = getDataFrameFilledWithMatchedMZ(all_MZ_data)
 
     print("done")
 
