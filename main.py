@@ -4,8 +4,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-# import seaborn as sns
-import re
 from scipy.signal import argrelextrema
 
 
@@ -77,14 +75,26 @@ def fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumbe
     lowerThreshold = currValue * (100 - PPM / 1000000) / 100
     upperThreshold = currValue * (100 + PPM / 1000000) / 100
 
-    for currColumnNameInAllMzData in allMzData.iloc[:, column + 1:]:
+    dataframeWithTrueInPlacesWhereTheValueNeedToBe = ((allMzData.loc[:, :] >= lowerThreshold) &
+                                                      (allMzData.loc[:, :] <= upperThreshold))
+    for currColumnName in dataframeWithTrueInPlacesWhereTheValueNeedToBe.iloc[:, column + 1:]:
+        seriesWithTrueInPlacesWhereTheValueNeedToBe = dataframeWithTrueInPlacesWhereTheValueNeedToBe[currColumnName]
+        matchColumn = getCurrColumnFromColumnNameInAllMzData(currColumnName)
+        matchedMZDataFrame.loc[:, matchColumn] = matchedMZDataFrame.loc[seriesWithTrueInPlacesWhereTheValueNeedToBe, matchColumn].\
+                                                                                replace(np.nan, currNumber).astype(float)
 
-        matchedRowsInCurrColumnIndex = allMzData.loc[(allMzData[currColumnNameInAllMzData] >= lowerThreshold) &
-                                                    (allMzData[currColumnNameInAllMzData] <= upperThreshold)].index
-        if(not matchedRowsInCurrColumnIndex.empty):
-            matchColumn = getCurrColumnFromColumnNameInAllMzData(currColumnNameInAllMzData)
-            matchRow = matchedRowsInCurrColumnIndex.item()
-            matchedMZDataFrame.iloc[matchRow, matchColumn] = currNumber
+    x = 0
+
+    # for currColumnNameInAllMzData in dataframeWithTheRelevantRowsForMatch.iloc[:, column + 1:]:
+    #
+    #     matchedRowsInCurrColumnIndex = dataframeWithTheRelevantRowsForMatch.loc[
+    #                                             (dataframeWithTheRelevantRowsForMatch[currColumnNameInAllMzData] >= 325) &
+    #                                             (dataframeWithTheRelevantRowsForMatch[currColumnNameInAllMzData] <= 330)].index
+    #
+    #     if(not matchedRowsInCurrColumnIndex.empty):
+    #         matchColumn = getCurrColumnFromColumnNameInAllMzData(currColumnNameInAllMzData)
+    #         matchRow = matchedRowsInCurrColumnIndex.item()
+    #         matchedMZDataFrame.iloc[matchRow, matchColumn] = currNumber
 
 
 def getDataFrameFilledWithMatchedMZ(allMzData):
@@ -105,7 +115,7 @@ def getDataFrameFilledWithMatchedMZ(allMzData):
                 fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumber)
                 currNumber += 1
 
-    print("done")
+    return matchedMZDataFrame
 
 
 def main():
