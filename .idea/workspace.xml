@@ -29,8 +29,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
-              <caret line="122" selection-start-line="122" selection-end-line="122" />
+            <state relative-caret-position="-273">
+              <caret line="98" column="8" selection-start-line="98" selection-start-column="8" selection-end-line="98" selection-end-column="8" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -189,7 +189,7 @@
       <workItem from="1554243682365" duration="26451000" />
       <workItem from="1554764872208" duration="1059000" />
       <workItem from="1559651988282" duration="3890000" />
-      <workItem from="1559977895009" duration="19385000" />
+      <workItem from="1559977895009" duration="20529000" />
     </task>
     <task id="LOCAL-00001" summary="main file first commit">
       <created>1554243780535</created>
@@ -230,7 +230,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="51017000" />
+    <option name="totallyTimeSpent" value="52161000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -242,7 +242,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32936078" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.34994584" />
+      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.34994584" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -255,7 +255,7 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" x="0" y="0" width="1920" height="1040" id="SciView" maximized="true" order="3" sideWeight="0.49919224" visible="true" weight="0.3736674" />
+      <window_info anchor="right" x="0" y="0" width="1920" height="1040" id="SciView" maximized="true" order="3" sideWeight="0.49919224" weight="0.25266525" />
       <window_info anchor="right" id="Database" order="4" weight="0.32995737" />
       <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="5" sideWeight="0.50080776" side_tool="true" weight="0.195629" />
     </layout>
@@ -321,7 +321,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/main.py</url>
-          <line>120</line>
+          <line>121</line>
           <option name="timeStamp" value="57" />
         </line-breakpoint>
       </breakpoints>
@@ -487,8 +487,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="122" selection-start-line="122" selection-end-line="122" />
+        <state relative-caret-position="-273">
+          <caret line="98" column="8" selection-start-line="98" selection-start-column="8" selection-end-line="98" selection-end-column="8" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
