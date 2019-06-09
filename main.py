@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-import seaborn as sns
+# import seaborn as sns
 import re
 from scipy.signal import argrelextrema
 
@@ -16,18 +16,6 @@ INTENSITY_NAME = "Intensity"
 PPM = 5
 
 
-def atoi(text):
-    return int(text) if text.isdigit() else text
-
-
-def naturalKeys(text):
-    return [atoi(c) for c in re.split(r'(\d+)', text)]
-
-
-def humanSort(list_of_strings_with_number):
-    return sorted(list_of_strings_with_number, key=naturalKeys)
-
-
 def getDataFrames():
     dataFrames = dict((samplePath, pd.read_excel(samplePath))
         for samplePath in glob.glob(os.path.join('data', '*.xlsx')))
@@ -35,14 +23,11 @@ def getDataFrames():
     return dataFrames
 
 
-def getDataFrameWithAllMZDataFramesTogether():
-    scriptDirPath = os.path.dirname(__file__)
-    dataDirPath = os.path.join(scriptDirPath, "data")
-
+def getDataFrameWithAllMZDataFramesTogether(dataDirPath):
     listOfDataFrames = []
-    for sampleFileName in humanSort(os.listdir(dataDirPath)):
+    for sampleFileName in os.listdir(dataDirPath):
         sampleFilePath = os.path.join(dataDirPath, sampleFileName)
-        sampleFileNameWithoutSuffix = (str)(sampleFileName.split(".")[0])
+        sampleFileNameWithoutSuffix = os.path.splitext(sampleFileName)[0]
         firstColName = sampleFileNameWithoutSuffix + " " + MZ_NAME
         secondColName = sampleFileNameWithoutSuffix + " " + INTENSITY_NAME
         curr_data_frame = pd.read_excel(sampleFilePath,
@@ -52,14 +37,11 @@ def getDataFrameWithAllMZDataFramesTogether():
     return pd.concat(listOfDataFrames, axis=1)
 
 
-def getDataFrameWithAllDataFramesTogether():
-    scriptDirPath = os.path.dirname(__file__)
-    dataDirPath = os.path.join(scriptDirPath, "data")
-
+def getDataFrameWithAllDataFramesTogether(dataDirPath):
     listOfDataFrames = []
-    for sampleFileName in humanSort(os.listdir(dataDirPath)):
+    for sampleFileName in os.listdir(dataDirPath):
         sampleFilePath = os.path.join(dataDirPath, sampleFileName)
-        sampleFileNameWithoutSuffix = (str)(sampleFileName.split(".")[0])
+        sampleFileNameWithoutSuffix = os.path.splitext(sampleFileName)[0]
         firstColName = sampleFileNameWithoutSuffix + " " + MZ_NAME
         secondColName = sampleFileNameWithoutSuffix + " " + INTENSITY_NAME
         listOfDataFrames.append(pd.read_excel(sampleFilePath, names=[firstColName, secondColName]))
@@ -107,9 +89,7 @@ def fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumbe
 def getDataFrameFilledWithMatchedMZ(allMzData):
 
     # initialize the matchedMZDataFrame
-    shape = allMzData.shape
-    numberOfRows = shape[0]
-    numberOfColumns = shape[1]
+    numberOfRows, numberOfColumns = allMzData.shape
     matchedMZDataFrame = pd.DataFrame(index=range(numberOfRows), columns=range(numberOfColumns))
     # matchedMZDataFrame[0] = np.arange(number_of_rows)
 
@@ -119,20 +99,20 @@ def getDataFrameFilledWithMatchedMZ(allMzData):
     # iteration over the df
     for column in matchedMZDataFrame:
         currMatchedMZDataFrameColumn = matchedMZDataFrame[column]
-        for items in currMatchedMZDataFrameColumn.iteritems():
-            row = items[0]
-            value = items[1]
-            if(pd.isna(value)):
+        for row, value in currMatchedMZDataFrameColumn.items():
+            if pd.isna(value):
                 fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumber)
                 currNumber += 1
-
 
     print("done")
 
 
 def main():
     # allData = getDataFrameWithAllDataFramesTogether()
-    allMZData = getDataFrameWithAllMZDataFramesTogether()
+    scriptDirPath = os.path.dirname(__file__)
+    dataDirPath = os.path.join(scriptDirPath, "data")
+    
+    allMZData = getDataFrameWithAllMZDataFramesTogether(dataDirPath)
     matchedMz = getDataFrameFilledWithMatchedMZ(allMZData)
 
 
