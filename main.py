@@ -84,18 +84,24 @@ def show_plots(n=5):
     plt.show()
 
 
+def getCurrColumnFromColumnNameInAllMzData(currColumnNameInAllMzData):
+    sampleName = currColumnNameInAllMzData.split(" ")[0]
+    return int(sampleName.split("sample")[1]) - 1
+
+
 def fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumber):
-    matchedMZDataFrame[row][column] = currNumber
+    matchedMZDataFrame.iloc[row, column] = currNumber
     currValue = allMzData.iloc[row, column]
     lowerThreshold = currValue * (100 - PPM / 1000000) / 100
     upperThreshold = currValue * (100 + PPM / 1000000) / 100
 
-    for currColumn in allMzData.iloc[:, column + 1:]:
-        matchedRowsInCurrColumn = allMzData.loc[(allMzData[currColumn] >= lowerThreshold) & (allMzData[currColumn] <= upperThreshold)]
-        if(not matchedRowsInCurrColumn.empty):
-            pass
-        
-        matchedRowsInCurrColumn = matchedRowsInCurrColumn
+    for currColumnNameInAllMzData in allMzData.iloc[:, column + 1:]:
+        matchedRowsInCurrColumnIndex = allMzData.loc[(allMzData[currColumnNameInAllMzData] >= lowerThreshold) &
+                                                    (allMzData[currColumnNameInAllMzData] <= upperThreshold)].index
+        if(not matchedRowsInCurrColumnIndex.empty):
+            matchColumn = getCurrColumnFromColumnNameInAllMzData(currColumnNameInAllMzData)
+            matchRow = matchedRowsInCurrColumnIndex.item()
+            matchedMZDataFrame.iloc[matchRow, matchColumn] = currNumber
 
 
 def getDataFrameFilledWithMatchedMZ(allMzData):
