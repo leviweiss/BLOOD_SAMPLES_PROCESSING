@@ -75,15 +75,27 @@ def fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumbe
     lowerThreshold = currValue * (100 - PPM / 1000000) / 100
     upperThreshold = currValue * (100 + PPM / 1000000) / 100
 
-    dataframeWithTrueInPlacesWhereTheValueNeedToBe = ((allMzData.loc[:, :] >= lowerThreshold) &
-                                                      (allMzData.loc[:, :] <= upperThreshold))
-    for currColumnName in dataframeWithTrueInPlacesWhereTheValueNeedToBe.iloc[:, column + 1:]:
-        seriesWithTrueInPlacesWhereTheValueNeedToBe = dataframeWithTrueInPlacesWhereTheValueNeedToBe[currColumnName]
-        matchColumn = getCurrColumnFromColumnNameInAllMzData(currColumnName)
-        matchedMZDataFrame.loc[:, matchColumn] = matchedMZDataFrame.loc[seriesWithTrueInPlacesWhereTheValueNeedToBe, matchColumn].\
-                                                                                replace(np.nan, currNumber).astype(float)
+    dataframeWithTrueInPlacesWhereTheValueNeedToBe = ((allMzData.iloc[:, column + 1:] >= lowerThreshold) &
+                                                      (allMzData.iloc[:, column + 1:] <= upperThreshold))
 
-    x = 0
+    seriesOfRowsWithTrueInPlacesWhereTheValueNeedToBe = dataframeWithTrueInPlacesWhereTheValueNeedToBe.any(axis=1)
+    cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe = dataframeWithTrueInPlacesWhereTheValueNeedToBe.loc[seriesOfRowsWithTrueInPlacesWhereTheValueNeedToBe, :]
+    seriesOfColumnsWithTrueIfAny = cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe.any(axis=0)
+    columnNamesWithMatch = seriesOfColumnsWithTrueIfAny[seriesOfColumnsWithTrueIfAny].index.values
+    cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe = cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe.loc[:, columnNamesWithMatch]
+
+    for currColumnName in columnNamesWithMatch:
+        matchColumn = getCurrColumnFromColumnNameInAllMzData(currColumnName)
+        x = cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe[currColumnName]
+        for row, value in x.items():
+            if(value):
+                matchedMZDataFrame.iloc[row, matchColumn] = currNumber
+
+        # seriesWithTrueInPlacesWhereTheValueNeedToBe = cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe[currColumnName]
+        # listOfRowsAny = seriesWithTrueInPlacesWhereTheValueNeedToBe.index.values
+
+        # matchedMZDataFrame.loc[:, matchColumn] = matchedMZDataFrame.loc[seriesWithTrueInPlacesWhereTheValueNeedToBe, matchColumn].\
+        #                                                                         replace(np.nan, currNumber)
 
     # for currColumnNameInAllMzData in dataframeWithTheRelevantRowsForMatch.iloc[:, column + 1:]:
     #
@@ -101,8 +113,12 @@ def getDataFrameFilledWithMatchedMZ(allMzData):
 
     # initialize the matchedMZDataFrame
     numberOfRows, numberOfColumns = allMzData.shape
-    matchedMZDataFrame = pd.DataFrame(index=range(numberOfRows), columns=range(numberOfColumns))
+    matchedMZDataFrame = pd.DataFrame(index=range(numberOfRows),
+                                      columns=range(numberOfColumns))
+
     # matchedMZDataFrame[0] = np.arange(number_of_rows)
+    # x = matchedMZDataFrame.dtypes
+
 
     # initialize the number need for iterating
     currNumber = 0
@@ -111,6 +127,7 @@ def getDataFrameFilledWithMatchedMZ(allMzData):
     for column in matchedMZDataFrame:
         currMatchedMZDataFrameColumn = matchedMZDataFrame[column]
         for row, value in currMatchedMZDataFrameColumn.items():
+            print("column: " + str(column) + " row: " + str(row))
             if pd.isna(value):
                 fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumber)
                 currNumber += 1
