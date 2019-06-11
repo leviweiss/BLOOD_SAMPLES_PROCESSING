@@ -141,6 +141,7 @@ def main():
     dataDirPath = os.path.join(scriptDirPath, "data")
     
     allMZData = getDataFrameWithAllMZDataFramesTogether(dataDirPath)
+    allMZData.to_excel("output.xlsx")
     matchedMz = getDataFrameFilledWithMatchedMZ(allMZData)
 
 
