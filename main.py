@@ -12,6 +12,11 @@ sys.path.insert(0, os.path.dirname(__file__))
 MZ_NAME = "MZ"
 INTENSITY_NAME = "Intensity"
 PPM = 5
+MZFileName = "MZData.xlsx"
+matchedMZFileName = "matchedMZFileName.xlsx"
+MAX_COLUMN = 20
+MAX_ROW = 50
+TO_CUT = True
 
 
 def getDataFrames():
@@ -69,14 +74,14 @@ def getCurrColumnFromColumnNameInAllMzData(currColumnNameInAllMzData):
     return int(sampleName.split("sample")[1]) - 1
 
 
-def fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumber):
+def fillMatchedMZDataFrame(allMZData, matchedMZDataFrame, row, column, currNumber):
     matchedMZDataFrame.iloc[row, column] = currNumber
-    currValue = allMzData.iloc[row, column]
-    lowerThreshold = currValue * (100 - PPM / 1000000) / 100
-    upperThreshold = currValue * (100 + PPM / 1000000) / 100
+    currValue = allMZData.iloc[row, column]
+    lowerThreshold = currValue - currValue * PPM / 10 ** 6
+    upperThreshold = currValue + currValue * PPM / 10 ** 6
 
-    dataframeWithTrueInPlacesWhereTheValueNeedToBe = ((allMzData.iloc[:, column + 1:] >= lowerThreshold) &
-                                                      (allMzData.iloc[:, column + 1:] <= upperThreshold))
+    dataframeWithTrueInPlacesWhereTheValueNeedToBe = ((allMZData.iloc[:, column + 1:] >= lowerThreshold) &
+                                                      (allMZData.iloc[:, column + 1:] <= upperThreshold))
 
     seriesOfRowsWithTrueInPlacesWhereTheValueNeedToBe = dataframeWithTrueInPlacesWhereTheValueNeedToBe.any(axis=1)
     cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe = dataframeWithTrueInPlacesWhereTheValueNeedToBe.loc[seriesOfRowsWithTrueInPlacesWhereTheValueNeedToBe, :]
@@ -109,10 +114,10 @@ def fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumbe
     #         matchedMZDataFrame.iloc[matchRow, matchColumn] = currNumber
 
 
-def getDataFrameFilledWithMatchedMZ(allMzData):
+def getDataFrameFilledWithMatchedMZ(allMZData):
 
     # initialize the matchedMZDataFrame
-    numberOfRows, numberOfColumns = allMzData.shape
+    numberOfRows, numberOfColumns = allMZData.shape
     matchedMZDataFrame = pd.DataFrame(index=range(numberOfRows),
                                       columns=range(numberOfColumns))
 
@@ -129,7 +134,7 @@ def getDataFrameFilledWithMatchedMZ(allMzData):
         for row, value in currMatchedMZDataFrameColumn.items():
             print("column: " + str(column) + " row: " + str(row))
             if pd.isna(value):
-                fillMatchedMZDataFrame(allMzData, matchedMZDataFrame, row, column, currNumber)
+                fillMatchedMZDataFrame(allMZData, matchedMZDataFrame, row, column, currNumber)
                 currNumber += 1
 
     return matchedMZDataFrame
@@ -139,10 +144,19 @@ def main():
     # allData = getDataFrameWithAllDataFramesTogether()
     scriptDirPath = os.path.dirname(__file__)
     dataDirPath = os.path.join(scriptDirPath, "data")
-    
-    allMZData = getDataFrameWithAllMZDataFramesTogether(dataDirPath)
-    allMZData.to_excel("output.xlsx")
-    matchedMz = getDataFrameFilledWithMatchedMZ(allMZData)
+
+    exists = os.path.isfile(MZFileName)
+    if not exists:
+        allMZData = getDataFrameWithAllMZDataFramesTogether(dataDirPath)
+        allMZData.to_excel(MZFileName)
+
+    allMZData = pd.read_excel(MZFileName, index_col=0)
+
+    if TO_CUT:
+        allMZData = allMZData.iloc[:MAX_ROW, :MAX_COLUMN]
+
+    matchedMZ = getDataFrameFilledWithMatchedMZ(allMZData)
+    matchedMZ.to_excel(matchedMZFileName)
 
 
     # samples = getDataFrames()
