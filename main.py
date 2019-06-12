@@ -12,8 +12,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 MZ_NAME = "MZ"
 INTENSITY_NAME = "Intensity"
 PPM = 5
-MZFileName = "MZData.xlsx"
-matchedMZFileName = "matchedMZFileName.xlsx"
+MZDataFileName = "MZData.xlsx"
+intensityDataFileName = "intensityData.xlsx"
+matchedMZFileName = "matchedMZ.xlsx"
+componentsIntensityFileName = "componentsIntensity.xlsx"
 MAX_COLUMN = 20
 MAX_ROW = 50
 TO_CUT = True
@@ -33,9 +35,23 @@ def getDataFrameWithAllMZDataFramesTogether(dataDirPath):
         sampleFileNameWithoutSuffix = os.path.splitext(sampleFileName)[0]
         firstColName = sampleFileNameWithoutSuffix + " " + MZ_NAME
         secondColName = sampleFileNameWithoutSuffix + " " + INTENSITY_NAME
-        curr_data_frame = pd.read_excel(sampleFilePath,
+        currDataFrame = pd.read_excel(sampleFilePath,
                                         names=[firstColName, secondColName])[firstColName]
-        listOfDataFrames.append(curr_data_frame)
+        listOfDataFrames.append(currDataFrame)
+
+    return pd.concat(listOfDataFrames, axis=1)
+
+
+def getDataFrameWithAllIntensityDataFramesTogether(dataDirPath):
+    listOfDataFrames = []
+    for sampleFileName in os.listdir(dataDirPath):
+        sampleFilePath = os.path.join(dataDirPath, sampleFileName)
+        sampleFileNameWithoutSuffix = os.path.splitext(sampleFileName)[0]
+        firstColName = sampleFileNameWithoutSuffix + " " + MZ_NAME
+        secondColName = sampleFileNameWithoutSuffix + " " + INTENSITY_NAME
+        currDataFrame = pd.read_excel(sampleFilePath,
+                                        names=[firstColName, secondColName])[secondColName]
+        listOfDataFrames.append(currDataFrame)
 
     return pd.concat(listOfDataFrames, axis=1)
 
@@ -74,7 +90,7 @@ def getCurrColumnFromColumnNameInAllMzData(currColumnNameInAllMzData):
     return int(sampleName.split("sample")[1]) - 1
 
 
-def fillMatchedMZDataFrame(allMZData, matchedMZDataFrame, row, column, currNumber):
+def fillMatchedMZDataFrame(allMZData, allIntensityData, matchedMZDataFrame, componentsIntensityMap, row, column, currNumber):
     matchedMZDataFrame.iloc[row, column] = currNumber
     currValue = allMZData.iloc[row, column]
     lowerThreshold = currValue - currValue * PPM / 10 ** 6
@@ -89,12 +105,21 @@ def fillMatchedMZDataFrame(allMZData, matchedMZDataFrame, row, column, currNumbe
     columnNamesWithMatch = seriesOfColumnsWithTrueIfAny[seriesOfColumnsWithTrueIfAny].index.values
     cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe = cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe.loc[:, columnNamesWithMatch]
 
+    # listToAppendToComponentsIntensity = {}
     for currColumnName in columnNamesWithMatch:
         matchColumn = getCurrColumnFromColumnNameInAllMzData(currColumnName)
-        x = cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe[currColumnName]
-        for row, value in x.items():
+        cuttedSeriesWithTrueInPlacesWhereTheValueNeedToBe = cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe[currColumnName]
+        for row, value in cuttedSeriesWithTrueInPlacesWhereTheValueNeedToBe.items():
             if(value):
                 matchedMZDataFrame.iloc[row, matchColumn] = currNumber
+                listToAppendToComponentsIntensity.append([row, matchColumn])
+
+    # for listOfRowAndColumn in listToAppendToComponentsIntensity:
+    #     row = listOfRowAndColumn[0]
+    #     column = listOfRowAndColumn[1]
+    #     componentsIntensity.iloc[currNumber, column] = allIntensityData.iloc[row, column]
+
+
 
         # seriesWithTrueInPlacesWhereTheValueNeedToBe = cuttedDataframeWithTrueInPlacesWhereTheValueNeedToBe[currColumnName]
         # listOfRowsAny = seriesWithTrueInPlacesWhereTheValueNeedToBe.index.values
@@ -114,12 +139,14 @@ def fillMatchedMZDataFrame(allMZData, matchedMZDataFrame, row, column, currNumbe
     #         matchedMZDataFrame.iloc[matchRow, matchColumn] = currNumber
 
 
-def getDataFrameFilledWithMatchedMZ(allMZData):
+def getDataFrameFilledWithMatchedMZ(allMZData, allIntensityData):
 
     # initialize the matchedMZDataFrame
     numberOfRows, numberOfColumns = allMZData.shape
     matchedMZDataFrame = pd.DataFrame(index=range(numberOfRows),
                                       columns=range(numberOfColumns))
+
+    componentsIntensityMap = {}
 
     # matchedMZDataFrame[0] = np.arange(number_of_rows)
     # x = matchedMZDataFrame.dtypes
@@ -134,29 +161,40 @@ def getDataFrameFilledWithMatchedMZ(allMZData):
         for row, value in currMatchedMZDataFrameColumn.items():
             print("column: " + str(column) + " row: " + str(row))
             if pd.isna(value):
-                fillMatchedMZDataFrame(allMZData, matchedMZDataFrame, row, column, currNumber)
+                fillMatchedMZDataFrame(allMZData, allIntensityData, matchedMZDataFrame, componentsIntensityMap, row, column, currNumber)
                 currNumber += 1
 
-    return matchedMZDataFrame
+    return matchedMZDataFrame, componentsIntensityMap
 
 
 def main():
-    # allData = getDataFrameWithAllDataFramesTogether()
     scriptDirPath = os.path.dirname(__file__)
     dataDirPath = os.path.join(scriptDirPath, "data")
 
-    exists = os.path.isfile(MZFileName)
-    if not exists:
+    MZFileNameExists = os.path.isfile(MZDataFileName)
+    if not MZFileNameExists:
         allMZData = getDataFrameWithAllMZDataFramesTogether(dataDirPath)
-        allMZData.to_excel(MZFileName)
+        allMZData.to_excel(MZDataFileName)
+    else:
+        allMZData = pd.read_excel(MZDataFileName, index_col=0)
 
-    allMZData = pd.read_excel(MZFileName, index_col=0)
+    intensityFileNameExists = os.path.isfile(intensityDataFileName)
+    if not intensityFileNameExists:
+        allIntensityData = getDataFrameWithAllIntensityDataFramesTogether(dataDirPath)
+        allIntensityData.to_excel(intensityDataFileName)
+    else:
+        allIntensityData = pd.read_excel(intensityDataFileName, index_col=0)
 
     if TO_CUT:
         allMZData = allMZData.iloc[:MAX_ROW, :MAX_COLUMN]
+        allIntensityData = allIntensityData.iloc[:MAX_ROW, :MAX_COLUMN]
 
-    matchedMZ = getDataFrameFilledWithMatchedMZ(allMZData)
+    matchedMZ, componentsIntensityMap = getDataFrameFilledWithMatchedMZ(allMZData, allIntensityData)
     matchedMZ.to_excel(matchedMZFileName)
+
+
+
+
 
 
     # samples = getDataFrames()
