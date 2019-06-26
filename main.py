@@ -16,9 +16,9 @@ MZDataFileName = "MZData.xlsx"
 intensityDataFileName = "intensityData.xlsx"
 matchedMZFileName = "matchedMZ.xlsx"
 componentsIntensityFileName = "componentsIntensity.xlsx"
-MAX_COLUMN = 20
+MAX_COLUMN = 10
 MAX_ROW = 50
-TO_CUT = True
+TO_CUT = False
 
 
 def getDataFrames():
@@ -112,7 +112,7 @@ def fillMatchedMZDataFrame(allMZData, allIntensityData, matchedMZDataFrame, comp
         for row, value in cuttedSeriesWithTrueInPlacesWhereTheValueNeedToBe.items():
             if(value):
                 matchedMZDataFrame.iloc[row, matchColumn] = currNumber
-                listToAppendToComponentsIntensity.append([row, matchColumn])
+                # listToAppendToComponentsIntensity.append([row, matchColumn])
 
     # for listOfRowAndColumn in listToAppendToComponentsIntensity:
     #     row = listOfRowAndColumn[0]
@@ -205,7 +205,6 @@ def main():
     #     table['MZ_{}'.format(os.path.basename(sampleName))] = [i if i in df.values else np.NaN for i in table.Samples]
     #
     # table.save
-
 
     print("done")
 
