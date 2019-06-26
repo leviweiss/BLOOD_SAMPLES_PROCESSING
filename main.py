@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 from scipy.signal import argrelextrema
+import xlsxwriter
 
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -158,13 +159,15 @@ def getDataFrameFilledWithMatchedMZ(allMZData, allIntensityData):
     # iteration over the df
     for column in matchedMZDataFrame:
         currMatchedMZDataFrameColumn = matchedMZDataFrame[column]
+        # print("column: " + str(column))
         for row, value in currMatchedMZDataFrameColumn.items():
-            print("column: " + str(column) + " row: " + str(row))
-            if pd.isna(value):
+            x = allMZData.iloc[row, column]
+            if pd.isna(value) and not pd.isna(x):
+                # print("column: " + str(column) + " row: " + str(row))
                 fillMatchedMZDataFrame(allMZData, allIntensityData, matchedMZDataFrame, componentsIntensityMap, row, column, currNumber)
                 currNumber += 1
 
-    return matchedMZDataFrame, componentsIntensityMap
+    return matchedMZDataFrame, componentsIntensityMap, currNumber, numberOfRows, numberOfColumns
 
 
 def main():
@@ -189,13 +192,12 @@ def main():
         allMZData = allMZData.iloc[:MAX_ROW, :MAX_COLUMN]
         allIntensityData = allIntensityData.iloc[:MAX_ROW, :MAX_COLUMN]
 
-    matchedMZ, componentsIntensityMap = getDataFrameFilledWithMatchedMZ(allMZData, allIntensityData)
+    matchedMZ, componentsIntensityMap, totalNumberOfDifferentElements, numberOfRows, numberOfColumns = \
+        getDataFrameFilledWithMatchedMZ(allMZData, allIntensityData)
+
     matchedMZ.to_excel(matchedMZFileName)
-
-
-
-
-
+    print("Total number of elements: " + str(totalNumberOfDifferentElements))
+    print("Total number of given samples: " + str(numberOfRows * numberOfColumns))
 
     # samples = getDataFrames()
     # joined = pd.concat(df.MZ for df in samples.values())
@@ -205,8 +207,6 @@ def main():
     #     table['MZ_{}'.format(os.path.basename(sampleName))] = [i if i in df.values else np.NaN for i in table.Samples]
     #
     # table.save
-
-    print("done")
 
 if __name__ == '__main__':
     main()
