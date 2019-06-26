@@ -124,5 +124,6 @@ dmypy.json
 .pyre/
 
 #Project
-workspace.xml
-tasks.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
